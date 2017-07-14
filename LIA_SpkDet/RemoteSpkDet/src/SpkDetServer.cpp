@@ -1810,11 +1810,22 @@ void SpkDetServer(Config &config) {
             case G_QUIT :
                 cout<<"bye bye"<<endl;
                 close(connfd);
-                close(listenfd);
-                delete _fs ;  
-                delete _ms; 
-                delete _ss;
-                exit(EXIT_SUCCESS);
+                //close(listenfd);
+                //delete _fs ;  
+                //delete _ms; 
+                //delete _ss;
+                //exit(EXIT_SUCCESS);
+				if (listen(listenfd, 5) < 0) {
+					cerr<<"Listen error"<<__FILE__<<" "<<__LINE__<<endl;
+					exit(EXIT_FAILURE);
+				}
+				cout<<"WAITING FOR CLIENT "<<endl<<endl;
+				if ( (connfd = accept(listenfd, (struct sockaddr *) NULL, NULL)) < 0) {
+					cerr<<"Accept error: "<<__FILE__<<" "<<__LINE__<<endl;
+					exit(EXIT_FAILURE);
+				}
+				cout<<"Client Reconnected"<<endl;
+				break;
             default :                                               // only with a client using a different version of the protocol
                 cout<<"unrecognized command : "<<(int)command<<endl;
                 close(connfd);
