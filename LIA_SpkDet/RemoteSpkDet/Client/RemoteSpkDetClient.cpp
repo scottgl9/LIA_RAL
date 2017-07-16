@@ -162,12 +162,8 @@ void printCommandList() {
  *
  *  \return true if G_RESET ok in the server, otherwise false
  */
-bool G_Reset(const int isockfd) {
-    string configName;
+bool G_Reset(const int isockfd, string& configName) {
     uint8_t creturn;
-    
-    cout<<"Enter config file name: ";
-    cin>>configName;
 
     send(isockfd, G_RESET, configName.size()+1, (uint8_t*)configName.c_str());
     creturn=0;
@@ -265,7 +261,7 @@ bool G_SendOpt(const int isockfd) {
  *
  *  \return true if A_RESET ok in the server, otherwise false
  */
-bool A_Reset (const int isockfd) {  
+bool A_Reset (const int isockfd) {
     uint8_t creturn;
 
     send(isockfd, A_RESET, 0, NULL);
@@ -289,12 +285,8 @@ bool A_Reset (const int isockfd) {
  *
  *  \return true if the audio buffer is saved in the server, otherwise false
  */
-bool A_Save (const int isockfd) {   
-    string fileName;
+bool A_Save (const int isockfd, string& fileName) {
     uint8_t creturn;
-    
-    cout<<"Enter filename to save audio buffer: ";
-    cin>>fileName;
 
     send(isockfd, A_SAVE, fileName.size()+1, (uint8_t*)fileName.c_str());
     creturn=0;
@@ -314,12 +306,8 @@ bool A_Save (const int isockfd) {
  *
  *  \return true if the audio buffer is loaded in the server, otherwise false
  */
-bool A_Load (const int isockfd) {   
-    string fileName;
+bool A_Load (const int isockfd, string& fileName) {
     uint8_t creturn;
-    
-    cout<<"Enter the name of a SERVER-SIDE file to load into the audio buffer: ";
-    cin>>fileName;
 
     send(isockfd, A_LOAD, fileName.size()+1, (uint8_t*)fileName.c_str());
     creturn=0;
@@ -339,18 +327,13 @@ bool A_Load (const int isockfd) {
  *
  *  \return true if the audio buffer is sent to the server, otherwise false
  */
-bool A_Send (const int isockfd) {   
+bool A_Send (const int isockfd, string& filename) {
     uint8_t creturn;
     size_t size=320;
     char *ctab = new char[size];
-    string filename;
     FILE *fin;
     unsigned long ll=0, totalSent=0, fileSize;
-    
-    cout<<"Enter the name of a LOCAL audio file to send to the server: ";
-    cin>>filename;
-    cout<<"Sending the file"<<endl;
-    
+
     fin = fopen(filename.c_str(), "rb");
         
     creturn = RSD_NO_ERROR;
@@ -378,7 +361,7 @@ bool A_Send (const int isockfd) {
  *
  *  \return true if F_RESET ok in the server, otherwise false
  */
-bool F_Reset (const int isockfd) {  
+bool F_Reset (const int isockfd) {
     uint8_t creturn;
 
     send(isockfd, F_RESET, 0, NULL);
@@ -400,12 +383,8 @@ bool F_Reset (const int isockfd) {
  *
  *  \return true if the audio buffer is saved in the server, otherwise false
  */
-bool F_Save (const int isockfd) {   
-    string fileName;
+bool F_Save (const int isockfdm, string& fileName) {
     uint8_t creturn;
-    
-    cout<<"Enter filename to save FeatureServer: ";
-    cin>>fileName;
 
     send(isockfd, F_SAVE, fileName.size()+1, (uint8_t*)fileName.c_str());
     creturn=0;
@@ -425,12 +404,8 @@ bool F_Save (const int isockfd) {
  *
  *  \return true if the audio buffer is loaded in the server, otherwise false
  */
-bool F_Load (const int isockfd) {   
-    string fileName;
+bool F_Load (const int isockfd, string& fileName) {
     uint8_t creturn;
-    
-    cout<<"Enter basename of feature file to load: ";
-    cin>>fileName;
 
     send(isockfd, F_LOAD, fileName.size()+1, (uint8_t*)fileName.c_str());
     creturn=0;
@@ -452,16 +427,13 @@ bool F_Load (const int isockfd) {
  *
  *  \return true if the audio buffer is sent to the server, otherwise false
  */
-bool F_Send (const int isockfd) {   
+bool F_Send (const int isockfd, string& filename) {
     uint8_t creturn;
     size_t size=320;
     char *ctab = new char[size];
-    string filename;
     ifstream fin;
     unsigned long ll=0, fileSize;
-    
-    cout<<"Enter the filename for features (RAW format): ";
-    cin>>filename;
+
     fin.open(filename.c_str(), ifstream::binary);
     fin.seekg(0, ios::end);
     fileSize = fin.tellg();
@@ -496,7 +468,7 @@ bool F_Send (const int isockfd) {
  *
  *  \return true if the model server is reset, otherwise false
  */
-bool M_Reset (const int isockfd) {  
+bool M_Reset (const int isockfd) {
     uint8_t creturn;
     
     send(isockfd, M_RESET, 0, NULL);
@@ -517,14 +489,9 @@ bool M_Reset (const int isockfd) {
  *
  *  \return true if the \a user_id model is saved, otherwise false
  */
-bool M_Save (const int isockfd) {   
+bool M_Save (const int isockfd, string& uId, string& fileName) {
     string fileName, uId, concat;
     uint8_t creturn;
-    
-    cout<<"Enter user_id for the model to save: ";
-    cin>>uId;
-    cout<<"Enter filename to save model["<<uId<<"]: ";
-    cin>>fileName;
 
     concat = uId + '\0' + fileName;
     
@@ -546,15 +513,9 @@ bool M_Save (const int isockfd) {
  *
  *  \return true if the model is loaded, otherwise false
  */
-bool M_Load (const int isockfd) {   
-    string fileName, uId, concat;
+bool M_Load (const int isockfd, string& uId, string& fileName) {
+    string concat;
     uint8_t creturn;
-    
-    
-    cout<<"Enter user_id for the model to load: ";
-    cin>>uId;
-    cout<<"Enter filename to load model["<<uId<<"]: ";
-    cin>>fileName;
 
     concat = uId + '\0' + fileName;
     
@@ -576,12 +537,8 @@ bool M_Load (const int isockfd) {
  *
  *  \return true if the world model is loaded, otherwise false
  */
-bool M_WLoad (const int isockfd) {  
-    string fileName;
+bool M_WLoad (const int isockfd, string& fileName) {
     uint8_t creturn;
-    
-    cout<<"Enter filename to load the world model: ";
-    cin>>fileName;
 
     send(isockfd, M_WLOAD, fileName.length()+1, (uint8_t*)fileName.c_str());
     creturn=0;
@@ -601,12 +558,8 @@ bool M_WLoad (const int isockfd) {
  *
  *  \return true if the \a user_id model is removed from model server, otherwise false
  */
-bool M_Del (const int isockfd) {    
-    string uId;
+bool M_Del (const int isockfd, string& uId) {
     uint8_t creturn;
-    
-    cout<<"Enter the user_id of the model to remove: ";
-    cin>>uId;
 
     send(isockfd, M_DEL, uId.length()+1, (uint8_t*)uId.c_str());
     creturn=0;
@@ -626,12 +579,8 @@ bool M_Del (const int isockfd) {
  *
  *  \return true if the \a user_id model is correctly adapt with feature in feature server, otherwise false
  */
-bool M_Adapt (const int isockfd) {  
-    string uId;
+bool M_Adapt (const int isockfd, string& Uid) {
     uint8_t creturn;
-    
-    cout<<"Enter the user_id of the model to adapt: ";
-    cin>>uId;
 
     send(isockfd, M_ADAPT, uId.length()+1, (uint8_t*)uId.c_str());
     creturn=0;
@@ -651,12 +600,8 @@ bool M_Adapt (const int isockfd) {
  *
  *  \return true if a model is correctly created with feature in feature server (user_id is requested), otherwise false
  */
-bool M_Train (const int isockfd) {  
-    string uId;
+bool M_Train (const int isockfd, string& uId) {
     uint8_t creturn;
-    
-    cout<<"Enter the user_id of the model to train: ";
-    cin>>uId;
 
     send(isockfd, M_TRAIN, uId.length()+1, (uint8_t*)uId.c_str());
     creturn=0;
@@ -676,13 +621,9 @@ bool M_Train (const int isockfd) {
  *
  *  \return true if there is no problem during Identification processing, otherwise false
  */
-bool I_Det (const int isockfd) {    
-    string uId;
+bool I_Det (const int isockfd, string& uId) {
     uint8_t creturn, cdecision;
     float fscore;
-    
-    cout<<"Enter the user_id for who the score must be performed: ";
-    cin>>uId;
 
     send(isockfd, I_DET, uId.length()+1, (uint8_t*)uId.c_str());
     creturn=0;
@@ -890,7 +831,7 @@ bool I_IdCumR (const int isockfd) {
 int RemoteSpkDetClient() {
     bool end=false;
     short port;
-    string ip;
+    string ip, filename, uId;
     int isockfd;
     struct sockaddr_in servaddr;
     int a;
@@ -932,7 +873,9 @@ int RemoteSpkDetClient() {
                 break;
             case G_RESET:
                 cout<<"G_RESET"<<endl;
-                G_Reset(isockfd);
+                cout<<"Enter config file name: ";
+                cin>>filename;
+                G_Reset(isockfd, filename);
                 break;
             case G_STATUS:
                 cout<<"G_STATUS"<<endl;
@@ -948,15 +891,22 @@ int RemoteSpkDetClient() {
                 break;
             case A_SAVE:
                 cout<<"A_SAVE"<<endl;
-                A_Save(isockfd);
+                cout<<"Enter filename to save audio buffer: ";
+				cin>>filename;
+                A_Save(isockfd, filename);
                 break;
             case A_LOAD:
                 cout<<"A_LOAD"<<endl;
-                A_Load(isockfd);
+                cout<<"Enter the name of a SERVER-SIDE file to load into the audio buffer: ";
+                cin>>filename;
+                A_Load(isockfd, filename);
                 break;
             case A_SEND:
                 cout<<"A_SEND"<<endl;
-                A_Send(isockfd);
+                cout<<"Enter the name of a LOCAL audio file to send to the server: ";
+                cin>>filename;
+                cout<<"Sending the file"<<endl;
+                A_Send(isockfd, filename);
                 break;
             case F_RESET:
                 cout<<"F_RESET"<<endl;
@@ -964,15 +914,21 @@ int RemoteSpkDetClient() {
                 break;
             case F_SAVE:
                 cout<<"F_SAVE"<<endl;
-                F_Save(isockfd);
+                cout<<"Enter filename to save FeatureServer: ";
+                cin>>filename;
+                F_Save(isockfd, filename);
                 break;
             case F_LOAD:
                 cout<<"F_LOAD"<<endl;
-                F_Load(isockfd);
+                cout<<"Enter basename of feature file to load: ";
+                cin>>filename;
+                F_Load(isockfd, filename);
                 break;
             case F_SEND:
                 cout<<"F_SEND"<<endl;
-                F_Send(isockfd);
+                cout<<"Enter the filename for features (RAW format): ";
+                cin>>filename;
+                F_Send(isockfd, filename);
                 break;
             case M_RESET:
                 cout<<"M_RESET"<<endl;
@@ -980,31 +936,49 @@ int RemoteSpkDetClient() {
                 break;
             case M_SAVE:
                 cout<<"M_SAVE"<<endl;
-                M_Save(isockfd);
+                cout<<"Enter user_id for the model to save: ";
+                cin>>uId;
+                cout<<"Enter filename to save model["<<uId<<"]: ";
+                cin>>filename;
+                M_Save(isockfd, uId, filename);
                 break;
             case M_LOAD:
                 cout<<"M_LOAD"<<endl;
-                M_Load(isockfd);
+                cout<<"Enter user_id for the model to load: ";
+                cin>>uId;
+                cout<<"Enter filename to load model["<<uId<<"]: ";
+                cin>>filename;
+                M_Load(isockfd, uId, filename);
                 break;
             case M_WLOAD:
                 cout<<"M_WLOAD"<<endl;
-                M_WLoad(isockfd);
+                cout<<"Enter filename to load the world model: ";
+                cin>>filename;
+                M_WLoad(isockfd, filename);
                 break;
             case M_DEL:
                 cout<<"M_DEL"<<endl;
-                M_Del(isockfd);
+                cout<<"Enter the user_id of the model to remove: ";
+                cin>>uId;
+                M_Del(isockfd, uId);
                 break;
             case M_ADAPT:
                 cout<<"M_ADAPT"<<endl;
-                M_Adapt(isockfd);
+                cout<<"Enter the user_id of the model to adapt: ";
+                cin>>uId;
+                M_Adapt(isockfd, uId);
                 break;
             case M_TRAIN:
                 cout<<"M_TRAIN"<<endl;
-                M_Train(isockfd);
+                cout<<"Enter the user_id of the model to train: ";
+                cin>>uId;
+                M_Train(isockfd, uId);
                 break;
             case I_DET:
                 cout<<"I_DET"<<endl;
-                I_Det(isockfd);
+                cout<<"Enter the user_id for who the score must be performed: ";
+                cin>>uId;
+                I_Det(isockfd, uId);
                 break;
             case I_ID:
                 cout<<"I_ID"<<endl;
