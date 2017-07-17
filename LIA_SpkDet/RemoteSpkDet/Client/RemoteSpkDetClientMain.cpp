@@ -24,7 +24,12 @@ using namespace std;
  */
 int main(int argc, char* argv[]) {
     try {
-        RemoteSpkDetClient();
+		if (argc > 1) 
+		{
+			RemoteSpkDetClientCmdLine(argc, argv);
+		} else {
+			RemoteSpkDetClient();
+		}
     }
     catch (exception& e) {
         cerr<<e.what()<<endl;

@@ -383,7 +383,7 @@ bool F_Reset (const int isockfd) {
  *
  *  \return true if the audio buffer is saved in the server, otherwise false
  */
-bool F_Save (const int isockfdm, string& fileName) {
+bool F_Save (const int isockfd, string& fileName) {
     uint8_t creturn;
 
     send(isockfd, F_SAVE, fileName.size()+1, (uint8_t*)fileName.c_str());
@@ -490,7 +490,7 @@ bool M_Reset (const int isockfd) {
  *  \return true if the \a user_id model is saved, otherwise false
  */
 bool M_Save (const int isockfd, string& uId, string& fileName) {
-    string fileName, uId, concat;
+    string concat;
     uint8_t creturn;
 
     concat = uId + '\0' + fileName;
@@ -579,7 +579,7 @@ bool M_Del (const int isockfd, string& uId) {
  *
  *  \return true if the \a user_id model is correctly adapt with feature in feature server, otherwise false
  */
-bool M_Adapt (const int isockfd, string& Uid) {
+bool M_Adapt (const int isockfd, string& uId) {
     uint8_t creturn;
 
     send(isockfd, M_ADAPT, uId.length()+1, (uint8_t*)uId.c_str());
@@ -691,13 +691,9 @@ bool I_Id (const int isockfd) {
  *
  *  \return true if there is no problem during Identification processing, otherwise false
  */
-bool I_DetCum (const int isockfd) { 
-    string uId;
+bool I_DetCum (const int isockfd, string& uId) { 
     uint8_t creturn, cdecision;
     float fscore;
-    
-    cout<<"Enter the user_id for who the score must be performed: ";
-    cin>>uId;
 
     send(isockfd, I_DETCUM, uId.length()+1, (uint8_t*)uId.c_str());
     creturn=0;
@@ -767,12 +763,8 @@ bool I_IdCum (const int isockfd) {
  *
  *  \return true if there is no problem during Identification processing, otherwise false
  */
-bool I_DetCumR (const int isockfd) {
+bool I_DetCumR (const int isockfd, string& uId) {
     uint8_t creturn;
-    string uId;
-    
-    cout<<"Enter the user_id for who the score must be resetd: ";
-    cin>>uId;
 
     send(isockfd, I_DETCUMR, uId.length()+1, (uint8_t*)uId.c_str());
     creturn=0;
@@ -986,7 +978,9 @@ int RemoteSpkDetClient() {
                 break;
             case I_DETCUM:
                 cout<<"I_DETCUM"<<endl;
-                I_DetCum(isockfd);
+				cout<<"Enter the user_id for who the score must be performed: ";
+                cin>>uId;
+                I_DetCum(isockfd, uId);
                 break;
             case I_IDCUM:
                 cout<<"I_IDCUM"<<endl;
@@ -994,7 +988,9 @@ int RemoteSpkDetClient() {
                 break;
             case I_DETCUMR:
                 cout<<"I_DETCUMR"<<endl;
-                I_DetCumR(isockfd);
+                cout<<"Enter the user_id for who the score must be reset: ";
+                cin>>uId;
+                I_DetCumR(isockfd, uId);
                 break;
             case I_IDCUMR:
                 cout<<"I_IDCUMR"<<endl;
@@ -1008,6 +1004,171 @@ int RemoteSpkDetClient() {
             default:
                 cout<<"unrecognized command"<<endl;
         } 
+    }
+    close(isockfd);
+    
+    return EXIT_SUCCESS;
+}
+
+int RemoteSpkDetClientCmdLine(int argc, char **argv) {
+    bool end=false;
+    short port;
+    string ip;
+    int isockfd;
+    struct sockaddr_in servaddr;
+	string s1, s2;
+	int cmd=-1;
+	cmd = atoi(argv[1]);
+	if (argc > 2) {
+		s1 = string(argv[2]);
+	}
+	if (argc > 3) {
+		s2 = string(argv[3]);
+	}
+/*
+	for (int i=1; i < argc; i++) {
+		if (!strcmp(argv[i], "--cmd") && argc > (i+1)) {
+			i++;
+			cmd = atoi(argv[i]);
+		} else if (!strcmp(argv[i], "--s1" && argc > (i+1)) {
+			i++;
+			s1 = string(argv[i]);
+		} else if (!strcmp(argv[i], "--s2" && argc > (i+1)) {
+			i++;
+			s2 = string(argv[i]);
+		}
+	}
+*/
+    cout<<"CONNECT TO  SERVER: "<<endl;
+
+    ip="127.0.0.1";
+    port=32114;
+    if ( (isockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        cerr<<"Unable to open a socket"<<__FILE__<<" "<<__LINE__<<endl;
+        exit(EXIT_FAILURE);
+    }
+
+    bzero(&servaddr, sizeof(struct sockaddr_in));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(port);
+    
+    if (inet_pton(AF_INET, ip.c_str(), &servaddr.sin_addr) <= 0){
+        cerr<<"inet_pton error"<<__FILE__<<" "<<__LINE__<<endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    if (connect(isockfd, (struct sockaddr *) &servaddr, sizeof(struct sockaddr_in)) < 0) {
+        cerr<<"connect error"<<__FILE__<<" "<<__LINE__<<endl;
+        exit(EXIT_FAILURE);
+    }
+
+    switch(cmd) {
+            case G_LIST:
+                printCommandList();
+                break;
+            case G_RESET:
+                cout<<"G_RESET"<<endl;
+                G_Reset(isockfd, s1);
+                break;
+            case G_STATUS:
+                cout<<"G_STATUS"<<endl;
+                G_Status(isockfd);
+                break;
+            case G_SENDOPT:
+                cout<<"G_SENDOPT"<<endl;
+                G_SendOpt(isockfd);
+                break;
+            case A_RESET:
+                cout<<"A_RESET"<<endl;
+                A_Reset(isockfd);
+                break;
+            case A_SAVE:
+                cout<<"A_SAVE"<<endl;
+                A_Save(isockfd, s1);
+                break;
+            case A_LOAD:
+                cout<<"A_LOAD"<<endl;
+                A_Load(isockfd, s1);
+                break;
+            case A_SEND:
+                cout<<"A_SEND"<<endl;
+                A_Send(isockfd, s1);
+                break;
+            case F_RESET:
+                cout<<"F_RESET"<<endl;
+                F_Reset(isockfd);
+                break;
+            case F_SAVE:
+                cout<<"F_SAVE"<<endl;
+                F_Save(isockfd, s1);
+                break;
+            case F_LOAD:
+                cout<<"F_LOAD"<<endl;
+                F_Load(isockfd, s1);
+                break;
+            case F_SEND:
+                cout<<"F_SEND"<<endl;
+                F_Send(isockfd, s1);
+                break;
+            case M_RESET:
+                cout<<"M_RESET"<<endl;
+                M_Reset(isockfd);
+                break;
+            case M_SAVE:
+                cout<<"M_SAVE"<<endl;
+                M_Save(isockfd, s1, s2);
+                break;
+            case M_LOAD:
+                cout<<"M_LOAD"<<endl;
+                M_Load(isockfd, s1, s2);
+                break;
+            case M_WLOAD:
+                cout<<"M_WLOAD"<<endl;
+                M_WLoad(isockfd, s1);
+                break;
+            case M_DEL:
+                cout<<"M_DEL"<<endl;
+                M_Del(isockfd, s1);
+                break;
+            case M_ADAPT:
+                cout<<"M_ADAPT"<<endl;
+                M_Adapt(isockfd, s1);
+                break;
+            case M_TRAIN:
+                cout<<"M_TRAIN"<<endl;
+                M_Train(isockfd, s1);
+                break;
+            case I_DET:
+                cout<<"I_DET"<<endl;
+                I_Det(isockfd, s1);
+                break;
+            case I_ID:
+                cout<<"I_ID"<<endl;
+                I_Id(isockfd);
+                break;
+            case I_DETCUM:
+                cout<<"I_DETCUM"<<endl;
+                I_DetCum(isockfd, s1);
+                break;
+            case I_IDCUM:
+                cout<<"I_IDCUM"<<endl;
+                I_IdCum(isockfd);
+                break;
+            case I_DETCUMR:
+                cout<<"I_DETCUMR"<<endl;
+                I_DetCumR(isockfd, s1);
+                break;
+            case I_IDCUMR:
+                cout<<"I_IDCUMR"<<endl;
+                I_IdCumR(isockfd);
+                break;
+            case G_QUIT:
+                cout<<"G_QUIT"<<endl;
+                send(isockfd, (uint8_t) G_QUIT, (uint32_t) 0, (uint8_t*) NULL);
+                end=true;
+                break;
+            default:
+                cout<<"unrecognized command"<<endl;
     }
     close(isockfd);
     

@@ -11,5 +11,6 @@
 #define __RemoteSpkDetClient_H__
 
 int RemoteSpkDetClient();
+int RemoteSpkDetClientCmdLine(int argc, char **argv);
 
 #endif
